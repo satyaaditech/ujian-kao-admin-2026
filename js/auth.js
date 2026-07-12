@@ -7,10 +7,10 @@
  * @param {string} token - Token yang akan divalidasi
  * @returns {Promise<object>} - Hasil validasi
  */
-async function validateToken(token) {
+async function validateToken(token, nama, email) {
     try {
         console.log('Mengirim request ke:', CONFIG.WEB_APP_URL);
-        console.log('Body:', JSON.stringify({ action: 'validateToken', token: token }));
+        console.log('Body:', JSON.stringify({ action: 'validateToken', token: token, nama: nama, email: email }));
         
         const response = await fetch(CONFIG.WEB_APP_URL, {
             method: 'POST',
@@ -19,16 +19,16 @@ async function validateToken(token) {
             },
             body: JSON.stringify({
                 action: 'validateToken',
-                token: token
+                token: token,
+                nama: nama,
+                email: email
             })
         });
         
         console.log('Response status:', response.status);
-        console.log('Response headers:', [...response.headers.entries()]);
         
         // Apps Script kadang wrap response dalam HTML, jadi kita ambil text dulu
         const responseText = await response.text();
-        console.log('Response text length:', responseText.length);
         console.log('Response text preview:', responseText.substring(0, 500));
         
         // Coba parse JSON dari response text
@@ -152,4 +152,33 @@ function saveTokenFromUrl(token) {
     console.log('Menyimpan token dari URL:', token);
     sessionStorage.setItem('exam_token', token.toUpperCase());
     return true;
+}
+
+/**
+ * Mengecek status token di server
+ * @param {string} token - Token yang akan dicek
+ * @returns {Promise<object>} - Status token
+ */
+async function checkTokenStatus(token) {
+    try {
+        const response = await fetch(`${CONFIG.WEB_APP_URL}?action=checkTokenStatus&token=${encodeURIComponent(token)}`);
+        const responseText = await response.text();
+        
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (parseError) {
+            const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                data = JSON.parse(jsonMatch[0]);
+            } else {
+                return { status: 'error', message: 'Response tidak valid' };
+            }
+        }
+        
+        return data.status || { status: 'error', message: 'Unknown' };
+    } catch (error) {
+        console.error('Error checking token status:', error);
+        return { status: 'error', message: error.message };
+    }
 }

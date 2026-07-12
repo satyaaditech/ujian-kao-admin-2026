@@ -249,13 +249,16 @@
                     </div>
                     
                     <!-- Thank You -->
-                    <div class="thank-you">
-                        <p>Terima kasih telah mengikuti ujian.</p>
-                        <p>Hasil ujian Anda akan segera dihubungi oleh tim HRD.</p>
-                        <button class="btn btn-secondary btn-print" onclick="window.print()">
-                            🖨️ Cetak Hasil
-                        </button>
-                    </div>
+    <div class="thank-you">
+        <p>Terima kasih telah mengikuti ujian.</p>
+        <p>Hasil ujian Anda akan segera diproses oleh tim HRD.</p>
+        <button class="btn btn-secondary" onclick="window.print()">
+            🖨️ Cetak Hasil
+        </button>
+        <button class="btn btn-primary" onclick="logout()" style="margin-left: 0.5rem;">
+            Keluar
+        </button>
+    </div>
                 </div>
             </div>
         </div>
@@ -269,26 +272,42 @@
         // =========================================================================
         
         async function init() {
+            console.log('=== RESULT PAGE INIT ===');
+            
+            // Cek token dari URL parameter
+            const urlToken = getUrlParam('token');
+            if (urlToken) {
+                console.log('Token dari URL:', urlToken);
+                sessionStorage.setItem('exam_token', urlToken.toUpperCase());
+            }
+            
             // Cek login
             if (!requireLogin()) return;
             
             // Ambil hasil dari sessionStorage atau server
             let result = null;
             const savedResult = sessionStorage.getItem('exam_result');
+            const session = getSession();
             
             if (savedResult) {
                 result = JSON.parse(savedResult);
-            } else {
+            } else if (session && session.token) {
                 // Ambil dari server
-                const session = getSession();
                 result = await fetchResults(session.token);
             }
             
             if (result) {
                 displayResults(result);
+                // Hapus session setelah hasil ditampilkan (auto logout)
+                clearSession();
             } else {
                 alert('Gagal memuat hasil ujian. Silakan hubungi admin.');
             }
+        }
+        
+        function logout() {
+            clearSession();
+            window.location.replace('index.html');
         }
         
         async function fetchResults(token) {

@@ -5,46 +5,268 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ujian Online - Admin Distributor KAO 2026</title>
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .exam-header {
+            background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo-small {
+            background: white;
+            color: #1a365d;
+            font-weight: bold;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .timer {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+        }
+        
+        .timer-danger {
+            background: rgba(231, 76, 60, 0.3);
+        }
+        
+        .exam-main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .progress-container {
+            background: #e0e0e0;
+            border-radius: 8px;
+            height: 8px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #3498db 0%, #27ae60 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        
+        .question-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .question-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .question-category {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .option:hover {
+            border-color: #3498db;
+            background: #f8f9fa;
+        }
+        
+        .option.selected {
+            border-color: #3498db;
+            background: #ebf5fb;
+        }
+        
+        .option.locked {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .option-letter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: #e0e0e0;
+            border-radius: 50%;
+            font-weight: 600;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .option.selected .option-letter {
+            background: #3498db;
+            color: white;
+        }
+        
+        .navigation-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin: 1.5rem 0;
+            gap: 1rem;
+        }
+        
+        .question-nav-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .question-nav {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            aspect-ratio: 1;
+            background: #f0f0f0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .nav-item:hover {
+            background: #e0e0e0;
+        }
+        
+        .nav-item.current {
+            background: #3498db;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .nav-item.answered {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .nav-item.locked {
+            background: #95a5a6;
+            color: white;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .nav-item.locked:hover {
+            background: #95a5a6;
+        }
+        
+        .submit-container {
+            text-align: center;
+            padding: 1rem 0;
+        }
+        
+        .locked-info {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .question-nav {
+                grid-template-columns: repeat(5, 1fr);
+            }
+            
+            .navigation-buttons {
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Header dengan Timer -->
     <header class="exam-header">
         <div class="header-left">
             <span class="logo-small">KAO</span>
-            <span class="header-title">Ujian Admin Distributor 2026</span>
+            <span>Ujian Admin Distributor 2026</span>
         </div>
-        <div class="header-right">
-            <div class="timer" id="timer">
-                <span class="timer-label">Sisa Waktu:</span>
-                <span class="timer-value" id="timerValue">45:00</span>
-            </div>
+        <div class="timer" id="timer">
+            <span>Sisa Waktu:</span>
+            <span id="timerValue">45:00</span>
         </div>
     </header>
     
-    <!-- Main Content -->
     <main class="exam-main">
-        <!-- Info Bar -->
         <div class="info-bar">
-            <div class="info-left">
-                <span class="participant-name" id="participantName">Memuat...</span>
+            <div>
+                <strong id="participantName">Memuat...</strong>
             </div>
-            <div class="info-center">
-                <span class="question-counter" id="questionCounter">Soal 1 dari 50</span>
-                <span class="progress-text" id="progressText">0/50 terjawab</span>
-            </div>
-            <div class="info-right">
-                <button class="btn btn-secondary btn-sm" id="btnRagu" onclick="toggleRagu()">
-                    <span id="raguIcon">☐</span> Ragu-ragu
-                </button>
+            <div>
+                <span id="questionCounter">Soal 1 dari 50</span> | 
+                <span id="progressText">0/50 terjawab</span>
             </div>
         </div>
         
-        <!-- Progress Bar -->
         <div class="progress-container">
             <div class="progress-bar" id="progressBar" style="width: 0%"></div>
         </div>
         
-        <!-- Question Container -->
+        <div class="locked-info" id="lockedInfo" style="display: none;">
+            ⚠️ Soal-soal sebelumnya sudah terkunci. Anda hanya bisa mengerjakan soal saat ini.
+        </div>
+        
         <div class="question-container" id="questionContainer">
             <div class="loading">
                 <div class="spinner-large"></div>
@@ -52,25 +274,17 @@
             </div>
         </div>
         
-        <!-- Navigation Buttons -->
         <div class="navigation-buttons">
-            <button class="btn btn-secondary" id="btnPrev" onclick="prevQuestion()">
-                ← Sebelumnya
-            </button>
             <button class="btn btn-primary" id="btnNext" onclick="nextQuestion()">
                 Selanjutnya →
             </button>
         </div>
         
-        <!-- Question Navigation Grid -->
         <div class="question-nav-container">
             <h3>Navigasi Soal</h3>
-            <div class="question-nav" id="questionNav">
-                <!-- Generated by JS -->
-            </div>
+            <div class="question-nav" id="questionNav"></div>
         </div>
         
-        <!-- Submit Button -->
         <div class="submit-container">
             <button class="btn btn-success btn-large" id="btnSubmit" onclick="submitExam()">
                 Selesai & Submit Ujian
@@ -78,13 +292,10 @@
         </div>
     </main>
     
-    <!-- Modal Konfirmasi -->
     <div class="modal" id="confirmModal">
         <div class="modal-content">
             <h2>Konfirmasi Submit Ujian</h2>
-            <div id="confirmMessage">
-                <!-- Filled by JS -->
-            </div>
+            <div id="confirmMessage"></div>
             <div class="modal-buttons">
                 <button class="btn btn-secondary" onclick="closeModal()">Batal</button>
                 <button class="btn btn-success" onclick="confirmSubmit()">Ya, Submit</button>
@@ -92,26 +303,32 @@
         </div>
     </div>
     
-    <!-- Modal Warning Timer -->
     <div class="modal" id="warningModal">
         <div class="modal-content modal-warning">
             <h2>⚠️ Peringatan Waktu!</h2>
             <p>Sisa waktu ujian Anda <strong>kurang dari 5 menit</strong>.</p>
-            <p>Silakan segera menyelesaikan ujian Anda.</p>
             <div class="modal-buttons">
                 <button class="btn btn-primary" onclick="closeWarningModal()">Mengerti</button>
             </div>
         </div>
     </div>
     
-    <!-- Modal Waktu Habis -->
     <div class="modal" id="timeUpModal">
         <div class="modal-content modal-danger">
             <h2>⏰ Waktu Habis!</h2>
-            <p>Waktu ujian Anda telah berakhir.</p>
-            <p>Jawaban Anda akan otomatis disubmit.</p>
+            <p>Waktu ujian Anda telah berakhir. Jawaban akan otomatis disubmit.</p>
             <div class="modal-buttons">
                 <button class="btn btn-primary" onclick="autoSubmit()">OK</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="blockedModal">
+        <div class="modal-content modal-danger">
+            <h2>⛔ Akses Ditolak</h2>
+            <p id="blockedMessage">Anda tidak bisa mengakses halaman ini.</p>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="logout()">Kembali ke Login</button>
             </div>
         </div>
     </div>
@@ -119,94 +336,91 @@
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
     <script>
-        // =========================================================================
-        //  STATE UJIAN
-        // =========================================================================
-        
+        // State
         let questions = [];
         let answers = {};
-        let raguList = new Set();
         let currentQuestion = 0;
+        let highestQuestion = 0; // Soal tertinggi yang pernah dicapai
         let startTime = null;
         let timerInterval = null;
-        let timeRemaining = CONFIG.BATAS_WAKTU_MENIT * 60; // dalam detik
+        let timeRemaining = CONFIG.BATAS_WAKTU_MENIT * 60;
         let warningShown = false;
-        
-        // =========================================================================
-        //  INISIALISASI
-        // =========================================================================
+        let isSubmitting = false;
         
         async function init() {
-            // Debug: cek session
             console.log('=== EXAM PAGE INIT ===');
-            console.log('exam_token:', sessionStorage.getItem('exam_token'));
-            console.log('exam_nama:', sessionStorage.getItem('exam_nama'));
-            console.log('exam_email:', sessionStorage.getItem('exam_email'));
-            console.log('URL token param:', getUrlParam('token'));
             
-            // Cek apakah token ada di URL parameter
+            // Cek apakah ada token di URL
             const urlToken = getUrlParam('token');
             if (urlToken && !sessionStorage.getItem('exam_token')) {
-                console.log('Token dari URL ditemukan, menyimpan ke sessionStorage...');
                 saveTokenFromUrl(urlToken);
             }
             
             // Cek login
-            if (!requireLogin()) {
-                console.log('Login required - redirecting to index.html');
+            if (!requireLogin()) return;
+            
+            const session = getSession();
+            console.log('Session:', session);
+            
+            // Cek status token di server
+            const tokenStatus = await checkTokenStatus(session.token);
+            console.log('Token status:', tokenStatus);
+            
+            if (tokenStatus.status === 'selesai') {
+                // Token sudah selesai, redirect ke hasil
+                console.log('Token sudah selesai - redirect ke hasil');
+                clearSession();
+                window.location.replace('result.html?token=' + encodeURIComponent(session.token));
                 return;
             }
             
-            console.log('Login OK - continuing...');
-            const session = getSession();
-            console.log('Session:', session);
+            if (tokenStatus.status === 'belum_digunakan') {
+                // Token belum digunakan, ini tidak seharusnya terjadi karena sudah divalidasi
+                // Tapi jika terjadi, redirect ke login
+                console.log('Token belum digunakan - redirect ke login');
+                clearSession();
+                window.location.replace('index.html');
+                return;
+            }
+            
             document.getElementById('participantName').textContent = session.nama;
             
-            // Cek apakah ada sesi ujian yang sedang berjalan
+            // Cek sesi ujian yang sedang berjalan
             const savedStartTime = sessionStorage.getItem('exam_start_time');
             const savedAnswers = sessionStorage.getItem('exam_answers');
             const savedCurrentQ = sessionStorage.getItem('exam_current_question');
+            const savedHighestQ = sessionStorage.getItem('exam_highest_question');
             
             if (savedStartTime) {
-                // Lanjutkan ujian yang sedang berjalan
                 startTime = new Date(savedStartTime);
                 const elapsed = Math.floor((Date.now() - startTime.getTime()) / 1000);
                 timeRemaining = Math.max(0, (CONFIG.BATAS_WAKTU_MENIT * 60) - elapsed);
                 
-                if (savedAnswers) {
-                    answers = JSON.parse(savedAnswers);
-                }
-                if (savedCurrentQ) {
-                    currentQuestion = parseInt(savedCurrentQ);
-                }
+                if (savedAnswers) answers = JSON.parse(savedAnswers);
+                if (savedCurrentQ) currentQuestion = parseInt(savedCurrentQ);
+                if (savedHighestQ) highestQuestion = parseInt(savedHighestQ);
             } else {
-                // Mulai ujian baru
                 startTime = new Date();
                 sessionStorage.setItem('exam_start_time', startTime.toISOString());
             }
             
-            // Ambil soal dari server
+            // Load soal
             await loadQuestions();
             
-            // Mulai timer
+            // Start timer
             startTimer();
             
-            // Tampilkan soal pertama
+            // Render
             renderQuestion();
             renderNavGrid();
             updateProgress();
         }
-        
-        // =========================================================================
-        //  LOAD SOAL DARI SERVER
-        // =========================================================================
         
         async function loadQuestions() {
             try {
                 const response = await fetch(`${CONFIG.WEB_APP_URL}?action=getQuestions`);
                 const responseText = await response.text();
                 
-                // Parse JSON dari response text
                 let data;
                 try {
                     data = JSON.parse(responseText);
@@ -230,10 +444,6 @@
             }
         }
         
-        // =========================================================================
-        //  TIMER
-        // =========================================================================
-        
         function startTimer() {
             updateTimerDisplay();
             
@@ -241,16 +451,11 @@
                 timeRemaining--;
                 updateTimerDisplay();
                 
-                // Simpan sisa waktu
-                sessionStorage.setItem('exam_time_remaining', timeRemaining);
-                
-                // Warning 5 menit
                 if (timeRemaining === 300 && !warningShown) {
                     showWarningModal();
                     warningShown = true;
                 }
                 
-                // Waktu habis
                 if (timeRemaining <= 0) {
                     clearInterval(timerInterval);
                     showTimeUpModal();
@@ -261,137 +466,111 @@
         function updateTimerDisplay() {
             const minutes = Math.floor(timeRemaining / 60);
             const seconds = timeRemaining % 60;
-            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('timerValue').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             
-            const timerValue = document.getElementById('timerValue');
-            timerValue.textContent = display;
-            
-            // Ubah warna jika waktu tersisa sedikit
             const timer = document.getElementById('timer');
-            if (timeRemaining <= 300) {
-                timer.className = 'timer timer-danger';
-            } else if (timeRemaining <= 600) {
-                timer.className = 'timer timer-warning';
-            }
+            if (timeRemaining <= 300) timer.classList.add('timer-danger');
         }
-        
-        // =========================================================================
-        //  RENDER SOAL
-        // =========================================================================
         
         function renderQuestion() {
             if (questions.length === 0) return;
             
             const q = questions[currentQuestion];
             const answer = answers[q.no] || '';
-            const isRagu = raguList.has(q.no);
+            const isLocked = currentQuestion < highestQuestion;
             
-            // Update counter
             document.getElementById('questionCounter').textContent = 
                 `Soal ${currentQuestion + 1} dari ${questions.length}`;
             
-            // Render soal
+            document.getElementById('lockedInfo').style.display = 
+                isLocked ? 'block' : 'none';
+            
             const container = document.getElementById('questionContainer');
             container.innerHTML = `
                 <div class="question-card">
                     <div class="question-header">
-                        <span class="question-number">Soal ${q.no}</span>
+                        <span style="font-weight: 600; color: #1a365d;">Soal ${q.no}</span>
                         <span class="question-category" style="background: ${CONFIG.KATEGORI_WARNA[q.kategori] || '#666'}">
                             ${CONFIG.KATEGORI[q.kategori] || q.kategori}
                         </span>
-                        <span class="question-weight">Bobot: ${q.bobot} poin</span>
+                        <span style="color: #666; font-size: 0.85rem; margin-left: auto;">Bobot: ${q.bobot} poin</span>
                     </div>
                     
-                    <div class="question-text">
+                    <div style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 1.5rem;">
                         ${q.pertanyaan}
                     </div>
                     
                     <div class="options">
-                        ${renderOption('A', q.opsi_a, answer)}
-                        ${renderOption('B', q.opsi_b, answer)}
-                        ${renderOption('C', q.opsi_c, answer)}
-                        ${renderOption('D', q.opsi_d, answer)}
-                        ${q.opsi_e ? renderOption('E', q.opsi_e, answer) : ''}
+                        ${renderOption('A', q.opsi_a, answer, isLocked)}
+                        ${renderOption('B', q.opsi_b, answer, isLocked)}
+                        ${renderOption('C', q.opsi_c, answer, isLocked)}
+                        ${renderOption('D', q.opsi_d, answer, isLocked)}
+                        ${q.opsi_e ? renderOption('E', q.opsi_e, answer, isLocked) : ''}
                     </div>
                 </div>
             `;
             
-            // Update ragu button
-            document.getElementById('raguIcon').textContent = isRagu ? '☑' : '☐';
-            document.getElementById('btnRagu').className = 
-                isRagu ? 'btn btn-warning btn-sm' : 'btn btn-secondary btn-sm';
-            
-            // Update nav buttons
-            document.getElementById('btnPrev').disabled = currentQuestion === 0;
-            document.getElementById('btnNext').textContent = 
-                currentQuestion === questions.length - 1 ? 'Selesai →' : 'Selanjutnya →';
+            // Update tombol Selanjutnya / Submit
+            const btnNext = document.getElementById('btnNext');
+            if (currentQuestion === questions.length - 1) {
+                btnNext.style.display = 'none';
+            } else {
+                btnNext.style.display = 'inline-block';
+                btnNext.textContent = 'Selanjutnya →';
+            }
         }
         
-        function renderOption(letter, text, selected) {
+        function renderOption(letter, text, selected, isLocked) {
             if (!text) return '';
             const isSelected = selected === letter;
+            const lockedClass = isLocked ? 'locked' : '';
+            const onclick = isLocked ? '' : `onclick="selectAnswer('${letter}')"`;
             return `
-                <div class="option ${isSelected ? 'selected' : ''}" onclick="selectAnswer('${letter}')">
+                <div class="option ${isSelected ? 'selected' : ''} ${lockedClass}" ${onclick}>
                     <span class="option-letter">${letter}</span>
-                    <span class="option-text">${text}</span>
-                    <span class="option-check">${isSelected ? '✓' : ''}</span>
+                    <span style="flex: 1;">${text}</span>
+                    <span style="width: 24px; text-align: center; color: #3498db; font-weight: bold;">
+                        ${isSelected ? '✓' : ''}
+                    </span>
                 </div>
             `;
         }
         
-        // =========================================================================
-        //  NAVIGASI
-        // =========================================================================
-        
         function selectAnswer(letter) {
             const q = questions[currentQuestion];
             answers[q.no] = letter;
-            
-            // Simpan ke sessionStorage
             sessionStorage.setItem('exam_answers', JSON.stringify(answers));
-            
-            // Update tampilan
             renderQuestion();
             renderNavGrid();
             updateProgress();
         }
         
-        function prevQuestion() {
-            if (currentQuestion > 0) {
-                currentQuestion--;
-                sessionStorage.setItem('exam_current_question', currentQuestion);
-                renderQuestion();
-            }
-        }
-        
         function nextQuestion() {
             if (currentQuestion < questions.length - 1) {
                 currentQuestion++;
+                
+                // Update highest question
+                if (currentQuestion > highestQuestion) {
+                    highestQuestion = currentQuestion;
+                    sessionStorage.setItem('exam_highest_question', highestQuestion);
+                }
+                
                 sessionStorage.setItem('exam_current_question', currentQuestion);
                 renderQuestion();
+                renderNavGrid();
             }
         }
         
         function goToQuestion(index) {
+            // Hanya bisa ke soal yang sudah pernah dikunjungi atau soal saat ini
+            if (index > highestQuestion) return;
+            
             currentQuestion = index;
             sessionStorage.setItem('exam_current_question', currentQuestion);
             renderQuestion();
-        }
-        
-        function toggleRagu() {
-            const q = questions[currentQuestion];
-            if (raguList.has(q.no)) {
-                raguList.delete(q.no);
-            } else {
-                raguList.add(q.no);
-            }
-            renderQuestion();
             renderNavGrid();
         }
-        
-        // =========================================================================
-        //  NAVIGATION GRID
-        // =========================================================================
         
         function renderNavGrid() {
             const nav = document.getElementById('questionNav');
@@ -399,56 +578,44 @@
             
             questions.forEach((q, index) => {
                 const isAnswered = answers[q.no] !== undefined;
-                const isRagu = raguList.has(q.no);
                 const isCurrent = index === currentQuestion;
+                const isLocked = index > highestQuestion;
                 
                 let className = 'nav-item';
                 if (isCurrent) className += ' current';
                 if (isAnswered) className += ' answered';
-                if (isRagu) className += ' ragu';
+                if (isLocked) className += ' locked';
                 
                 const div = document.createElement('div');
                 div.className = className;
                 div.textContent = q.no;
-                div.onclick = () => goToQuestion(index);
+                
+                if (!isLocked) {
+                    div.onclick = () => goToQuestion(index);
+                }
                 
                 nav.appendChild(div);
             });
         }
         
-        // =========================================================================
-        //  PROGRESS
-        // =========================================================================
-        
         function updateProgress() {
             const answered = Object.keys(answers).length;
             const total = questions.length;
-            const percent = (answered / total) * 100;
+            const percent = total > 0 ? (answered / total) * 100 : 0;
             
             document.getElementById('progressBar').style.width = `${percent}%`;
             document.getElementById('progressText').textContent = `${answered}/${total} terjawab`;
         }
         
-        // =========================================================================
-        //  SUBMIT UJIAN
-        // =========================================================================
-        
         function submitExam() {
-            // Hitung statistik
             const answered = Object.keys(answers).length;
             const unanswered = questions.length - answered;
             
             let message = '';
             if (unanswered > 0) {
-                message = `
-                    <p>Anda masih memiliki <strong>${unanswered} soal belum dijawab</strong>.</p>
-                    <p>Apakah Anda yakin ingin submit ujian?</p>
-                `;
+                message = `<p>Anda masih memiliki <strong>${unanswered} soal belum dijawab</strong>.</p><p>Apakah Anda yakin ingin submit ujian?</p>`;
             } else {
-                message = `
-                    <p>Semua soal sudah dijawab.</p>
-                    <p>Apakah Anda yakin ingin submit ujian?</p>
-                `;
+                message = `<p>Semua soal sudah dijawab.</p><p>Apakah Anda yakin ingin submit ujian?</p>`;
             }
             
             document.getElementById('confirmMessage').innerHTML = message;
@@ -460,19 +627,21 @@
         }
         
         async function confirmSubmit() {
+            if (isSubmitting) return;
+            isSubmitting = true;
             closeModal();
             
-            // Hitung durasi
+            clearInterval(timerInterval);
+            
             const endTime = new Date();
             const duration = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
+            const session = getSession();
             
-            // Siapkan data jawaban
             const answersArray = Object.entries(answers).map(([no, jawaban]) => ({
                 no: parseInt(no),
                 jawaban: jawaban
             }));
             
-            // Tampilkan loading
             document.getElementById('questionContainer').innerHTML = `
                 <div class="loading">
                     <div class="spinner-large"></div>
@@ -481,7 +650,6 @@
                 </div>
             `;
             
-            // Kirim ke server
             try {
                 const response = await fetch(CONFIG.WEB_APP_URL, {
                     method: 'POST',
@@ -490,15 +658,16 @@
                     },
                     body: JSON.stringify({
                         action: 'submitAnswers',
-                        token: getSession().token,
+                        token: session.token,
                         answers: answersArray,
-                        duration: duration
+                        duration: duration,
+                        nama: session.nama,
+                        email: session.email
                     })
                 });
                 
                 const responseText = await response.text();
                 
-                // Parse JSON dari response text
                 let result;
                 try {
                     result = JSON.parse(responseText);
@@ -512,22 +681,26 @@
                 }
                 
                 if (result.success) {
-                    // Simpan hasil untuk ditampilkan di halaman result
+                    // Hapus semua session ujian (auto logout)
+                    clearExamSession();
+                    
+                    // Simpan hasil sementara untuk ditampilkan
                     sessionStorage.setItem('exam_result', JSON.stringify(result));
                     
-                    // Clear timer
-                    clearInterval(timerInterval);
-                    
                     // Redirect ke halaman hasil
-                    window.location.href = 'result.html';
+                    window.location.replace('result.html?token=' + encodeURIComponent(session.token));
                 } else {
                     alert('Gagal submit ujian: ' + result.message);
+                    isSubmitting = false;
                     renderQuestion();
+                    startTimer();
                 }
             } catch (error) {
                 console.error('Error submitting:', error);
                 alert('Gagal terhubung ke server. Error: ' + error.message);
+                isSubmitting = false;
                 renderQuestion();
+                startTimer();
             }
         }
         
@@ -536,9 +709,16 @@
             confirmSubmit();
         }
         
-        // =========================================================================
-        //  MODALS
-        // =========================================================================
+        function clearExamSession() {
+            sessionStorage.removeItem('exam_answers');
+            sessionStorage.removeItem('exam_start_time');
+            sessionStorage.removeItem('exam_current_question');
+            sessionStorage.removeItem('exam_highest_question');
+            sessionStorage.removeItem('exam_time_remaining');
+            sessionStorage.removeItem('exam_token');
+            sessionStorage.removeItem('exam_nama');
+            sessionStorage.removeItem('exam_email');
+        }
         
         function showWarningModal() {
             document.getElementById('warningModal').style.display = 'flex';
@@ -552,10 +732,12 @@
             document.getElementById('timeUpModal').style.display = 'flex';
         }
         
-        // =========================================================================
-        //  INISIALISASI
-        // =========================================================================
+        function logout() {
+            clearSession();
+            window.location.replace('index.html');
+        }
         
+        // Initialize
         init();
     </script>
 </body>

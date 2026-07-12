@@ -7,15 +7,15 @@
     <link rel="stylesheet" href="css/styles.css">
     <style>
         .login-container {
-            max-width: 450px;
+            max-width: 480px;
             margin: 0 auto;
         }
         
         .token-input {
             font-family: 'Courier New', monospace;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             text-align: center;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             text-transform: uppercase;
         }
         
@@ -32,6 +32,12 @@
         .info-box strong {
             color: #333;
         }
+        
+        .form-note {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
     </style>
 </head>
 <body>
@@ -45,7 +51,7 @@
             
             <form id="loginForm">
                 <div class="form-group">
-                    <label for="tokenInput">Masukkan Token Ujian</label>
+                    <label for="tokenInput">Token Ujian</label>
                     <input 
                         type="text" 
                         id="tokenInput" 
@@ -55,6 +61,31 @@
                         required
                         autocomplete="off"
                     >
+                    <div class="form-note">Token diberikan oleh HRD.</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="namaInput">Nama Lengkap</label>
+                    <input 
+                        type="text" 
+                        id="namaInput" 
+                        class="form-control" 
+                        placeholder="Masukkan nama lengkap Anda"
+                        required
+                        autocomplete="name"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="emailInput">Email</label>
+                    <input 
+                        type="email" 
+                        id="emailInput" 
+                        class="form-control" 
+                        placeholder="contoh@email.com"
+                        required
+                        autocomplete="email"
+                    >
                 </div>
                 
                 <div id="errorMessage" class="alert alert-error" style="display: none;"></div>
@@ -62,18 +93,18 @@
                 <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
                     <span class="btn-text">Mulai Ujian</span>
                     <span class="btn-loading" style="display: none;">
-                        <i class="spinner"></i> Memverifikasi...
+                        <span class="spinner"></span> Memverifikasi...
                     </span>
                 </button>
             </form>
             
             <div class="info-box">
-                <strong>Catatan:</strong>
+                <strong>Catatan Penting:</strong>
                 <ul style="margin: 0.5rem 0 0 0; padding-left: 1.2rem;">
-                    <li>Token diberikan oleh HRD</li>
                     <li>Token hanya bisa digunakan <strong>1 kali</strong></li>
-                    <li>Pastikan koneksi internet stabil</li>
+                    <li>Pastikan data nama dan email benar</li>
                     <li>Waktu ujian: <strong>45 menit</strong></li>
+                    <li>Setelah submit, Anda tidak bisa mengulang ujian</li>
                 </ul>
             </div>
         </div>
@@ -88,7 +119,8 @@
     <script>
         // Cek apakah sudah login, jika ya redirect ke halaman ujian
         if (isLoggedIn()) {
-            window.location.href = 'exam.html';
+            const session = getSession();
+            window.location.replace('exam.html?token=' + encodeURIComponent(session.token));
         }
         
         // Handle form submission
@@ -96,16 +128,38 @@
             e.preventDefault();
             
             const tokenInput = document.getElementById('tokenInput');
+            const namaInput = document.getElementById('namaInput');
+            const emailInput = document.getElementById('emailInput');
             const submitBtn = document.getElementById('submitBtn');
             const errorMessage = document.getElementById('errorMessage');
             const btnText = submitBtn.querySelector('.btn-text');
             const btnLoading = submitBtn.querySelector('.btn-loading');
             
-            // Validasi input
+            // Ambil dan bersihkan input
             const token = tokenInput.value.trim().toUpperCase();
+            const nama = namaInput.value.trim();
+            const email = emailInput.value.trim().toLowerCase();
             
+            // Validasi input client-side
             if (!token) {
                 showError('Masukkan token ujian Anda');
+                return;
+            }
+            
+            if (!nama) {
+                showError('Masukkan nama lengkap Anda');
+                return;
+            }
+            
+            if (!email) {
+                showError('Masukkan email Anda');
+                return;
+            }
+            
+            // Validasi format email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError('Format email tidak valid');
                 return;
             }
             
@@ -116,26 +170,20 @@
             hideError();
             
             // Validasi ke server
-            console.log('Validating token:', token);
-            const result = await validateToken(token);
+            console.log('Validating:', { token, nama, email });
+            const result = await validateToken(token, nama, email);
             console.log('Validation result:', result);
             
             if (result.valid) {
                 console.log('Token valid! Saving session...');
-                console.log('Nama:', result.nama);
-                console.log('Email:', result.email);
                 
                 // Simpan sesi
-                saveSession(token, result.nama, result.email);
-                
-                // Verifikasi session tersimpan
-                console.log('Session saved:', sessionStorage.getItem('exam_token'));
+                saveSession(token, nama, email);
                 
                 // Redirect ke halaman ujian dengan token di URL sebagai fallback
                 const examUrl = 'exam.html?token=' + encodeURIComponent(token);
                 console.log('Redirecting to:', examUrl);
                 
-                // Gunakan window.location.replace agar tidak bisa kembali ke login
                 setTimeout(function() {
                     window.location.replace(examUrl);
                 }, 200);
