@@ -185,7 +185,20 @@
         async function loadQuestions() {
             try {
                 const response = await fetch(`${CONFIG.WEB_APP_URL}?action=getQuestions`);
-                const data = await response.json();
+                const responseText = await response.text();
+                
+                // Parse JSON dari response text
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (parseError) {
+                    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        data = JSON.parse(jsonMatch[0]);
+                    } else {
+                        throw new Error('Response tidak valid');
+                    }
+                }
                 
                 if (data.success && data.questions) {
                     questions = data.questions;
@@ -194,7 +207,7 @@
                 }
             } catch (error) {
                 console.error('Error loading questions:', error);
-                alert('Gagal terhubung ke server. Periksa koneksi internet Anda.');
+                alert('Gagal terhubung ke server. Error: ' + error.message);
             }
         }
         
@@ -464,7 +477,20 @@
                     })
                 });
                 
-                const result = await response.json();
+                const responseText = await response.text();
+                
+                // Parse JSON dari response text
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (parseError) {
+                    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        result = JSON.parse(jsonMatch[0]);
+                    } else {
+                        throw new Error('Response tidak valid');
+                    }
+                }
                 
                 if (result.success) {
                     // Simpan hasil untuk ditampilkan di halaman result
@@ -481,7 +507,7 @@
                 }
             } catch (error) {
                 console.error('Error submitting:', error);
-                alert('Gagal terhubung ke server. Silakan coba lagi.');
+                alert('Gagal terhubung ke server. Error: ' + error.message);
                 renderQuestion();
             }
         }

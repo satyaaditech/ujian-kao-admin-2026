@@ -20,14 +20,31 @@ async function validateToken(token) {
             })
         });
         
-        const result = await response.json();
+        // Apps Script kadang wrap response dalam HTML, jadi kita ambil text dulu
+        const responseText = await response.text();
+        
+        // Coba parse JSON dari response text
+        let result;
+        try {
+            // Coba langsung parse
+            result = JSON.parse(responseText);
+        } catch (parseError) {
+            // Jika gagal, coba cari JSON di dalam HTML response
+            const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                result = JSON.parse(jsonMatch[0]);
+            } else {
+                throw new Error('Response tidak valid dari server');
+            }
+        }
+        
         return result;
         
     } catch (error) {
         console.error('Error validating token:', error);
         return {
             valid: false,
-            message: 'Gagal terhubung ke server. Periksa koneksi internet Anda.'
+            message: 'Gagal terhubung ke server. Error: ' + error.message
         };
     }
 }
