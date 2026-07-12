@@ -131,11 +131,14 @@
                 // Verifikasi session tersimpan
                 console.log('Session saved:', sessionStorage.getItem('exam_token'));
                 
-                // Tambahkan delay kecil untuk memastikan session tersimpan
+                // Redirect ke halaman ujian dengan token di URL sebagai fallback
+                const examUrl = 'exam.html?token=' + encodeURIComponent(token);
+                console.log('Redirecting to:', examUrl);
+                
+                // Gunakan window.location.replace agar tidak bisa kembali ke login
                 setTimeout(function() {
-                    console.log('Redirecting to exam.html...');
-                    window.location.href = 'exam.html';
-                }, 100);
+                    window.location.replace(examUrl);
+                }, 200);
             } else {
                 // Tampilkan error
                 showError(result.message);

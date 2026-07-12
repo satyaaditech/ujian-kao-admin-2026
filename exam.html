@@ -142,6 +142,14 @@
             console.log('exam_token:', sessionStorage.getItem('exam_token'));
             console.log('exam_nama:', sessionStorage.getItem('exam_nama'));
             console.log('exam_email:', sessionStorage.getItem('exam_email'));
+            console.log('URL token param:', getUrlParam('token'));
+            
+            // Cek apakah token ada di URL parameter
+            const urlToken = getUrlParam('token');
+            if (urlToken && !sessionStorage.getItem('exam_token')) {
+                console.log('Token dari URL ditemukan, menyimpan ke sessionStorage...');
+                saveTokenFromUrl(urlToken);
+            }
             
             // Cek login
             if (!requireLogin()) {
@@ -151,6 +159,7 @@
             
             console.log('Login OK - continuing...');
             const session = getSession();
+            console.log('Session:', session);
             document.getElementById('participantName').textContent = session.nama;
             
             // Cek apakah ada sesi ujian yang sedang berjalan

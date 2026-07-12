@@ -9,6 +9,9 @@
  */
 async function validateToken(token) {
     try {
+        console.log('Mengirim request ke:', CONFIG.WEB_APP_URL);
+        console.log('Body:', JSON.stringify({ action: 'validateToken', token: token }));
+        
         const response = await fetch(CONFIG.WEB_APP_URL, {
             method: 'POST',
             headers: {
@@ -20,8 +23,13 @@ async function validateToken(token) {
             })
         });
         
+        console.log('Response status:', response.status);
+        console.log('Response headers:', [...response.headers.entries()]);
+        
         // Apps Script kadang wrap response dalam HTML, jadi kita ambil text dulu
         const responseText = await response.text();
+        console.log('Response text length:', responseText.length);
+        console.log('Response text preview:', responseText.substring(0, 500));
         
         // Coba parse JSON dari response text
         let result;
@@ -29,6 +37,7 @@ async function validateToken(token) {
             // Coba langsung parse
             result = JSON.parse(responseText);
         } catch (parseError) {
+            console.log('Direct parse gagal, mencoba ekstrak JSON dari HTML...');
             // Jika gagal, coba cari JSON di dalam HTML response
             const jsonMatch = responseText.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
@@ -38,6 +47,7 @@ async function validateToken(token) {
             }
         }
         
+        console.log('Parsed result:', result);
         return result;
         
     } catch (error) {
@@ -56,22 +66,46 @@ async function validateToken(token) {
  * @param {string} email - Email kandidat
  */
 function saveSession(token, nama, email) {
+    console.log('Menyimpan session:', { token, nama, email });
     sessionStorage.setItem('exam_token', token);
     sessionStorage.setItem('exam_nama', nama);
     sessionStorage.setItem('exam_email', email);
+    console.log('Session tersimpan - token:', sessionStorage.getItem('exam_token'));
+    console.log('Session tersimpan - nama:', sessionStorage.getItem('exam_nama'));
+    console.log('Session tersimpan - email:', sessionStorage.getItem('exam_email'));
 }
 
 /**
- * Mengambil data sesi dari sessionStorage
+ * Mendapatkan parameter dari URL
+ * @param {string} name - Nama parameter
+ * @returns {string|null} - Nilai parameter
+ */
+function getUrlParam(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+}
+
+/**
+ * Mengambil data sesi dari sessionStorage atau URL parameter
  * @returns {object|null} - Data sesi atau null
  */
 function getSession() {
-    const token = sessionStorage.getItem('exam_token');
-    const nama = sessionStorage.getItem('exam_nama');
-    const email = sessionStorage.getItem('exam_email');
+    // Coba ambil dari sessionStorage dulu
+    let token = sessionStorage.getItem('exam_token');
+    let nama = sessionStorage.getItem('exam_nama');
+    let email = sessionStorage.getItem('exam_email');
     
-    if (token && nama && email) {
-        return { token, nama, email };
+    // Jika tidak ada di sessionStorage, coba ambil dari URL parameter
+    if (!token) {
+        const urlToken = getUrlParam('token');
+        if (urlToken) {
+            token = urlToken.toUpperCase();
+            console.log('Token diambil dari URL parameter:', token);
+        }
+    }
+    
+    if (token) {
+        return { token, nama: nama || 'Kandidat', email: email || '' };
     }
     return null;
 }
@@ -101,8 +135,21 @@ function isLoggedIn() {
  */
 function requireLogin() {
     if (!isLoggedIn()) {
+        console.log('Belum login - redirect ke index.html');
         window.location.href = 'index.html';
         return false;
     }
+    console.log('Sudah login - token:', getSession().token);
+    return true;
+}
+
+/**
+ * Menyimpan token dari URL parameter ke sessionStorage
+ * @param {string} token - Token dari URL
+ * @returns {boolean} - true jika berhasil
+ */
+function saveTokenFromUrl(token) {
+    console.log('Menyimpan token dari URL:', token);
+    sessionStorage.setItem('exam_token', token.toUpperCase());
     return true;
 }
