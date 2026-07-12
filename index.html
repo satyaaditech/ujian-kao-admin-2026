@@ -116,14 +116,26 @@
             hideError();
             
             // Validasi ke server
+            console.log('Validating token:', token);
             const result = await validateToken(token);
+            console.log('Validation result:', result);
             
             if (result.valid) {
+                console.log('Token valid! Saving session...');
+                console.log('Nama:', result.nama);
+                console.log('Email:', result.email);
+                
                 // Simpan sesi
                 saveSession(token, result.nama, result.email);
                 
-                // Redirect ke halaman ujian
-                window.location.href = 'exam.html';
+                // Verifikasi session tersimpan
+                console.log('Session saved:', sessionStorage.getItem('exam_token'));
+                
+                // Tambahkan delay kecil untuk memastikan session tersimpan
+                setTimeout(function() {
+                    console.log('Redirecting to exam.html...');
+                    window.location.href = 'exam.html';
+                }, 100);
             } else {
                 // Tampilkan error
                 showError(result.message);

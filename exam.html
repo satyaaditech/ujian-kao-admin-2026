@@ -137,9 +137,19 @@
         // =========================================================================
         
         async function init() {
-            // Cek login
-            if (!requireLogin()) return;
+            // Debug: cek session
+            console.log('=== EXAM PAGE INIT ===');
+            console.log('exam_token:', sessionStorage.getItem('exam_token'));
+            console.log('exam_nama:', sessionStorage.getItem('exam_nama'));
+            console.log('exam_email:', sessionStorage.getItem('exam_email'));
             
+            // Cek login
+            if (!requireLogin()) {
+                console.log('Login required - redirecting to index.html');
+                return;
+            }
+            
+            console.log('Login OK - continuing...');
             const session = getSession();
             document.getElementById('participantName').textContent = session.nama;
             
