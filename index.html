@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Ujian Online - Admin Distributor KAO 2026</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .login-container {
+            max-width: 450px;
+            margin: 0 auto;
+        }
+        
+        .token-input {
+            font-family: 'Courier New', monospace;
+            font-size: 1.5rem;
+            text-align: center;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            text-align: left;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        
+        .info-box strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card login-container">
+            <div class="header">
+                <div class="logo">KAO</div>
+                <h1>Sistem Ujian Online</h1>
+                <p class="subtitle">Admin Distributor 2026</p>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="tokenInput">Masukkan Token Ujian</label>
+                    <input 
+                        type="text" 
+                        id="tokenInput" 
+                        class="form-control token-input" 
+                        placeholder="KAO-2026-XXXX"
+                        maxlength="15"
+                        required
+                        autocomplete="off"
+                    >
+                </div>
+                
+                <div id="errorMessage" class="alert alert-error" style="display: none;"></div>
+                
+                <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
+                    <span class="btn-text">Mulai Ujian</span>
+                    <span class="btn-loading" style="display: none;">
+                        <i class="spinner"></i> Memverifikasi...
+                    </span>
+                </button>
+            </form>
+            
+            <div class="info-box">
+                <strong>Catatan:</strong>
+                <ul style="margin: 0.5rem 0 0 0; padding-left: 1.2rem;">
+                    <li>Token diberikan oleh HRD</li>
+                    <li>Token hanya bisa digunakan <strong>1 kali</strong></li>
+                    <li>Pastikan koneksi internet stabil</li>
+                    <li>Waktu ujian: <strong>45 menit</strong></li>
+                </ul>
+            </div>
+        </div>
+        
+        <footer class="footer">
+            <p>&copy; 2026 KAO Indonesia. Hak Cipta Dilindungi.</p>
+        </footer>
+    </div>
+    
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Cek apakah sudah login, jika ya redirect ke halaman ujian
+        if (isLoggedIn()) {
+            window.location.href = 'exam.html';
+        }
+        
+        // Handle form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const tokenInput = document.getElementById('tokenInput');
+            const submitBtn = document.getElementById('submitBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const btnLoading = submitBtn.querySelector('.btn-loading');
+            
+            // Validasi input
+            const token = tokenInput.value.trim().toUpperCase();
+            
+            if (!token) {
+                showError('Masukkan token ujian Anda');
+                return;
+            }
+            
+            // Tampilkan loading
+            submitBtn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline';
+            hideError();
+            
+            // Validasi ke server
+            const result = await validateToken(token);
+            
+            if (result.valid) {
+                // Simpan sesi
+                saveSession(token, result.nama, result.email);
+                
+                // Redirect ke halaman ujian
+                window.location.href = 'exam.html';
+            } else {
+                // Tampilkan error
+                showError(result.message);
+                
+                // Reset button
+                submitBtn.disabled = false;
+                btnText.style.display = 'inline';
+                btnLoading.style.display = 'none';
+            }
+        });
+        
+        // Format token input (uppercase otomatis)
+        document.getElementById('tokenInput').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+        
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
