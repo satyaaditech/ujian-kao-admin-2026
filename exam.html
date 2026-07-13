@@ -221,9 +221,14 @@
             <span class="logo-small">KAO</span>
             <span>Ujian Admin Distributor 2026</span>
         </div>
-        <div class="timer" id="timer">
-            <span>Sisa Waktu:</span>
-            <span id="timerValue">45:00</span>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div class="timer" id="timer">
+                <span>Sisa Waktu:</span>
+                <span id="timerValue">45:00</span>
+            </div>
+            <button class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.5rem 0.75rem;" onclick="logoutAndSubmit()">
+                Keluar
+            </button>
         </div>
     </header>
     
@@ -544,10 +549,27 @@
         
         function submitExam() {
             if (isSubmitting) return;
-            confirmSubmit();
+            confirmSubmit(false);
         }
         
-        async function confirmSubmit() {
+        function logoutAndSubmit() {
+            if (isSubmitting) return;
+            
+            const answered = Object.keys(answers).length;
+            const total = questions.length;
+            
+            let message = 'Anda akan keluar dari ujian. ';
+            if (answered < total) {
+                message += `Anda baru menjawab ${answered} dari ${total} soal. `;
+            }
+            message += 'Jawaban yang sudah Anda pilih akan tetap tersimpan. Lanjutkan keluar?';
+            
+            if (confirm(message)) {
+                confirmSubmit(true);
+            }
+        }
+        
+        async function confirmSubmit(isLogout) {
             isSubmitting = true;
             
             clearInterval(globalTimerInterval);
@@ -605,7 +627,7 @@
                     clearExamSession();
                     
                     // Tampilkan ucapan terima kasih
-                    showThankYou();
+                    showThankYou(isLogout);
                 } else {
                     alert('Gagal submit ujian: ' + result.message);
                     isSubmitting = false;
@@ -617,15 +639,19 @@
             }
         }
         
-        function showThankYou() {
+        function showThankYou(isLogout) {
+            const title = isLogout ? 'Anda Telah Keluar' : 'Terima Kasih!';
+            const message = isLogout 
+                ? 'Jawaban Anda telah disimpan. Terima kasih telah mengikuti ujian.'
+                : 'Jawaban Anda telah berhasil disimpan.<br>Hasil ujian akan segera diproses oleh tim HRD.';
+            
             document.body.innerHTML = `
                 <div class="container">
                     <div class="card thank-you-container">
                         <div class="thank-you-icon">✅</div>
-                        <h1 class="thank-you-title">Terima Kasih!</h1>
+                        <h1 class="thank-you-title">${title}</h1>
                         <p class="thank-you-text">
-                            Jawaban Anda telah berhasil disimpan.<br>
-                            Hasil ujian akan segera diproses oleh tim HRD.
+                            ${message}
                         </p>
                         <button class="btn btn-primary" onclick="window.location.replace('index.html')">
                             Kembali ke Halaman Login
@@ -637,7 +663,7 @@
         
         function autoSubmit() {
             document.getElementById('timeUpModal').style.display = 'none';
-            confirmSubmit();
+            confirmSubmit(false);
         }
         
         function clearExamSession() {
