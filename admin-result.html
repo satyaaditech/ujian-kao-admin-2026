@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasil Evaluasi - Admin Distributor KAO 2026</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .login-admin {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1a365d;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
+        .results-table {
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-collapse: collapse;
+        }
+        
+        .results-table th {
+            background: #1a365d;
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .results-table td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .results-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .score-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .score-high {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .score-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .score-low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .recommendation-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .rank-1 { background: #ffd700; color: #333; }
+        .rank-2 { background: #c0c0c0; color: #333; }
+        .rank-3 { background: #cd7f32; color: white; }
+        
+        .category-scores {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+        
+        .category-score {
+            font-size: 0.75rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            background: #e9ecef;
+        }
+        
+        .btn-export {
+            margin-bottom: 1rem;
+        }
+        
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .results-table {
+                font-size: 0.8rem;
+            }
+            
+            .results-table th,
+            .results-table td {
+                padding: 0.5rem;
+            }
+            
+            .category-scores {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card admin-container">
+            <div class="header">
+                <div class="logo">KAO</div>
+                <h1>Hasil Evaluasi Ujian</h1>
+                <p class="subtitle">Admin Distributor 2026</p>
+            </div>
+            
+            <!-- Login Admin -->
+            <div id="loginSection">
+                <div class="login-admin">
+                    <h2 style="text-align: center; margin-bottom: 1.5rem;">Akses Hasil Evaluasi</h2>
+                    <div class="form-group">
+                        <label for="adminPassword">Password Admin</label>
+                        <input 
+                            type="password" 
+                            id="adminPassword" 
+                            class="form-control" 
+                            placeholder="Masukkan password admin"
+                            required
+                        >
+                    </div>
+                    <div id="errorMessage" class="alert alert-error" style="display: none;"></div>
+                    <button class="btn btn-primary btn-block" id="loginBtn" onclick="loginAdmin()">
+                        Masuk
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Results Section -->
+            <div id="resultsSection" style="display: none;">
+                <div class="header-actions">
+                    <h2>Rekap Hasil Peserta</h2>
+                    <div>
+                        <button class="btn btn-secondary btn-export" onclick="exportToCSV()">
+                            📥 Export CSV
+                        </button>
+                        <button class="btn btn-primary" onclick="logoutAdmin()">
+                            Keluar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalPeserta">0</div>
+                        <div class="stat-label">Total Peserta</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="rataRataSkor">0</div>
+                        <div class="stat-label">Rata-rata Skor</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="skorTertinggi">0</div>
+                        <div class="stat-label">Skor Tertinggi</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="skorTerendah">0</div>
+                        <div class="stat-label">Skor Terendah</div>
+                    </div>
+                </div>
+                
+                <div style="overflow-x: auto;">
+                    <table class="results-table" id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Nama</th>
+                                <th>Email</th>
+                                <th>Skor Total</th>
+                                <th>Rekomendasi</th>
+                                <th>Detail Kategori</th>
+                                <th>Benar/Salah/Kosong</th>
+                                <th>Durasi</th>
+                                <th>Waktu Selesai</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        const ADMIN_PASSWORD = "adminkao123";
+        let allResults = [];
+        
+        function loginAdmin() {
+            const password = document.getElementById('adminPassword').value;
+            const errorDiv = document.getElementById('errorMessage');
+            
+            if (password === ADMIN_PASSWORD) {
+                sessionStorage.setItem('admin_logged_in', 'true');
+                showResults();
+            } else {
+                errorDiv.textContent = 'Password salah!';
+                errorDiv.style.display = 'block';
+            }
+        }
+        
+        function logoutAdmin() {
+            sessionStorage.removeItem('admin_logged_in');
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('adminPassword').value = '';
+        }
+        
+        async function showResults() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
+            
+            // Load data
+            allResults = await fetchAllResults();
+            renderResults(allResults);
+            renderStats(allResults);
+        }
+        
+        async function fetchAllResults() {
+            try {
+                const response = await fetch(`${CONFIG.WEB_APP_URL}?action=getAllResults`);
+                const responseText = await response.text();
+                
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (parseError) {
+                    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        data = JSON.parse(jsonMatch[0]);
+                    } else {
+                        return [];
+                    }
+                }
+                
+                return data.results || [];
+            } catch (error) {
+                console.error('Error fetching results:', error);
+                return [];
+            }
+        }
+        
+        function renderResults(results) {
+            const tbody = document.getElementById('resultsBody');
+            tbody.innerHTML = '';
+            
+            if (results.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Belum ada data hasil ujian</td></tr>';
+                return;
+            }
+            
+            results.forEach((result, index) => {
+                const rank = index + 1;
+                const row = document.createElement('tr');
+                
+                // Skor badge class
+                let scoreClass = 'score-low';
+                if (result.skor_total >= 70) scoreClass = 'score-high';
+                else if (result.skor_total >= 50) scoreClass = 'score-medium';
+                
+                // Rank class
+                let rankClass = '';
+                if (rank === 1) rankClass = 'rank-1';
+                else if (rank === 2) rankClass = 'rank-2';
+                else if (rank === 3) rankClass = 'rank-3';
+                
+                row.innerHTML = `
+                    <td><span class="recommendation-badge ${rankClass}">${rank}</span></td>
+                    <td><strong>${escapeHtml(result.nama)}</strong></td>
+                    <td>${escapeHtml(result.email)}</td>
+                    <td><span class="score-badge ${scoreClass}">${result.skor_total}</span></td>
+                    <td>${result.rekomendasi}</td>
+                    <td>
+                        <div class="category-scores">
+                            <span class="category-score">Num: ${result.skor_numerik}</span>
+                            <span class="category-score">Verb: ${result.skor_verbal}</span>
+                            <span class="category-score">Log: ${result.skor_logika}</span>
+                            <span class="category-score">Pers: ${result.skor_personality}</span>
+                            <span class="category-score">Pen: ${result.skor_pengetahuan}</span>
+                            <span class="category-score">Sit: ${result.skor_situasional}</span>
+                        </div>
+                    </td>
+                    <td>${result.jumlah_benar}/${result.jumlah_salah}/${result.jumlah_kosong}</td>
+                    <td>${result.durasi_menit} menit</td>
+                    <td>${formatDate(result.waktu_selesai)}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        function renderStats(results) {
+            if (results.length === 0) {
+                document.getElementById('totalPeserta').textContent = '0';
+                document.getElementById('rataRataSkor').textContent = '0';
+                document.getElementById('skorTertinggi').textContent = '0';
+                document.getElementById('skorTerendah').textContent = '0';
+                return;
+            }
+            
+            const scores = results.map(r => r.skor_total);
+            const total = results.length;
+            const avg = Math.round(scores.reduce((a, b) => a + b, 0) / total);
+            const max = Math.max(...scores);
+            const min = Math.min(...scores);
+            
+            document.getElementById('totalPeserta').textContent = total;
+            document.getElementById('rataRataSkor').textContent = avg;
+            document.getElementById('skorTertinggi').textContent = max;
+            document.getElementById('skorTerendah').textContent = min;
+        }
+        
+        function exportToCSV() {
+            if (allResults.length === 0) {
+                alert('Tidak ada data untuk di-export');
+                return;
+            }
+            
+            let csv = 'Rank,Nama,Email,Skor Total,Rekomendasi,Numerik,Verbal,Logika,Personality,Pengetahuan,Situasional,Benar,Salah,Kosong,Durasi,Waktu Selesai\n';
+            
+            allResults.forEach((result, index) => {
+                csv += `${index + 1},${result.nama},${result.email},${result.skor_total},${result.rekomendasi},`;
+                csv += `${result.skor_numerik},${result.skor_verbal},${result.skor_logika},${result.skor_personality},${result.skor_pengetahuan},${result.skor_situasional},`;
+                csv += `${result.jumlah_benar},${result.jumlah_salah},${result.jumlah_kosong},${result.durasi_menit},${result.waktu_selesai}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'hasil-ujian-kao-2026.csv';
+            link.click();
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return dateStr;
+            
+            return date.toLocaleString('id-ID', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // Enter key untuk login
+        document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') loginAdmin();
+        });
+        
+        // Cek jika sudah login sebelumnya
+        if (sessionStorage.getItem('admin_logged_in') === 'true') {
+            showResults();
+        }
+    </script>
+</body>
+</html>
